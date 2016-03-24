@@ -156,6 +156,11 @@ public class Database<T extends Row> {
         return get(keyColumnIndex, key);
     }
 
+    public T removeFromIndex(int index) {
+        checkRowIndex(index);
+        return rows.remove(index);
+    }
+
     public T remove(int columnIndex, Object key) {
         int index;
         checkRowIndex(index = getRowIndex(columnIndex, key));
@@ -203,6 +208,14 @@ public class Database<T extends Row> {
 
     public void save(OutputStream out) throws IOException {
         saveFormat.write(out, this);
+    }
+
+    public void save(File file) {
+        try (OutputStream out = new FileOutputStream(file)) {
+            save(out);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void save() {

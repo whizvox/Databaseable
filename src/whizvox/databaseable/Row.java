@@ -4,16 +4,20 @@ public class Row {
 
     private Object[] objs;
 
-    public Row(Object... objs) {
+    /**
+     * All instances of this REQUIRE an empty constructor
+     */
+    public Row() {
+
+    }
+
+    public Row setObjects(Object... objs) {
         this.objs = objs;
+        return this;
     }
 
     public final int count() {
         return objs.length;
-    }
-
-    public Object[] getObjects() {
-        return objs;
     }
 
     public void set(int columnIndex, Object obj) {
@@ -26,10 +30,8 @@ public class Row {
         return obj;
     }
 
-    public Object replace(int columnIndex, Object newObj) {
-        final Object obj = objs[columnIndex];
-        objs[columnIndex] = newObj;
-        return this;
+    public Object getObject(int index) {
+        return objs[index];
     }
 
 }

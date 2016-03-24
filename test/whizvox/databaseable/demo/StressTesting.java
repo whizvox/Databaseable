@@ -27,7 +27,7 @@ public class StressTesting {
             t1 = System.currentTimeMillis();
             Random rand = new Random();
             for (int i = 0; i < iterations; i++) {
-                db.addRow(new PlayerData(UUID.randomUUID(), ";;player" + i, rand.nextInt(101), rand.nextFloat() * 100, rand.nextFloat() * 10, new Date(System.currentTimeMillis())));
+                db.add(new PlayerData(UUID.randomUUID(), ";;player" + i, rand.nextInt(101), rand.nextFloat() * 100, rand.nextFloat() * 10, new Date(System.currentTimeMillis())));
             }
             t2 = System.currentTimeMillis();
             delta = t2 - t1;

@@ -29,7 +29,7 @@ public class BufferedSaveFormat extends SaveFormat {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
         CharBuffer buf = CharBuffer.allocate(bufferSize);
         for (int i = 0; i < database.size(); i++) {
-            Row row = database.getRow(i);
+            Row row = database.getFromIndex(i);
             for (int j = 0; j < database.columnCount; j++) {
                 Codec codec = database.getCodec(j);
                 if (codec.requiresSanitation()) {
@@ -76,7 +76,7 @@ public class BufferedSaveFormat extends SaveFormat {
                         row.set(i, codec.read(objsStr[i]));
                     }
                 }
-                database.addRow(row);
+                database.add(row);
                 buf.clear();
                 index = 0;
                 continue;

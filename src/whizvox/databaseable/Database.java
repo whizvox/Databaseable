@@ -112,6 +112,10 @@ public class Database<T extends Row> {
         return get(keyColumnIndex, key);
     }
 
+    public void clear() {
+        rows.clear();
+    }
+
     public void save(OutputStream out) throws IOException {
         saveFormat.write(out, this);
     }

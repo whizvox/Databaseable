@@ -1,8 +1,12 @@
 package whizvox.databaseable.standards;
 
 import whizvox.databaseable.Codec;
+import whizvox.databaseable.DbArray;
+import whizvox.databaseable.InvalidSyntaxException;
 import whizvox.databaseable.StringUtils;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -13,219 +17,239 @@ public class StandardCodecs {
     private StandardCodecs() {}
 
     public static final Codec<String> CODEC_STRING = new Codec<String>() {
-        @Override
-        public Class<String> getObjectClass() {
+        @Override public Class<String> getObjectClass() {
             return String.class;
         }
-        @Override
-        public CharSequence write(String obj) {
+        @Override public String write(String obj) {
             return obj;
         }
-        @Override
-        public String read(CharSequence s) {
-            return s.toString();
+        @Override public String read(String s) {
+            return s;
         }
-        @Override
-        public boolean requiresSanitation() {
+        @Override public boolean requiresSanitation() {
             return true;
         }
     };
 
-    public static final Codec<Boolean> CODEC_BOOLEAN = new Codec<Boolean>() {
-        @Override
-        public Class<Boolean> getObjectClass() {
+    public static final Codec<String> CODEC_STRING_UNCHECKED = new Codec<String>() {
+        @Override public Class<String> getObjectClass() {
+            return String.class;
+        }
+        @Override public String write(String obj) {
+            return obj;
+        }
+        @Override public String read(String s) {
+            return s;
+        }
+    };
+
+    public static final Codec<Boolean> CODEC_BOOLEAN_STRING = new Codec<Boolean>() {
+        @Override public Class<Boolean> getObjectClass() {
             return Boolean.class;
         }
-        @Override
-        public CharSequence write(Boolean obj) {
-            return Boolean.toString(obj);
+        @Override public String write(Boolean obj) {
+            return StringUtils.booleanToString(obj);
         }
-        @Override
-        public Boolean read(CharSequence s) {
+        @Override public Boolean read(String s) {
             return StringUtils.parseBoolean(s);
         }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+    };
+
+    public static final Codec<Boolean> CODEC_BOOLEAN_BIT = new Codec<Boolean>() {
+        @Override public Class<Boolean> getObjectClass() {
+            return Boolean.class;
+        }
+        @Override public String write(Boolean obj) {
+            return StringUtils.booleanToBitString(obj);
+        }
+        @Override public Boolean read(String s) {
+            return StringUtils.parseBoolean(s);
+        }
+    };
+
+    public static final Codec<Byte> CODEC_BYTE = new Codec<Byte>() {
+        @Override public Class<Byte> getObjectClass() {
+            return Byte.class;
+        }
+        @Override public String write(Byte obj) {
+            return Byte.toString(obj);
+        }
+        @Override public Byte read(String s) {
+            return Byte.parseByte(s);
+        }
+    };
+
+    public static final Codec<Byte> CODEC_BYTE_HEX = new Codec<Byte>() {
+        @Override public Class<Byte> getObjectClass() {
+            return Byte.class;
+        }
+        @Override public String write(Byte obj) {
+            return Integer.toHexString(obj);
+        }
+        @Override public Byte read(String s) {
+            return Byte.parseByte(s, 16);
         }
     };
 
     public static final Codec<Integer> CODEC_INT = new Codec<Integer>() {
-        @Override
-        public Class<Integer> getObjectClass() {
+        @Override public Class<Integer> getObjectClass() {
             return Integer.class;
         }
-        @Override
-        public CharSequence write(Integer obj) {
+        @Override public String write(Integer obj) {
             return Integer.toString(obj);
         }
-        @Override
-        public Integer read(CharSequence s) {
-            return Integer.parseInt(s.toString());
+        @Override public Integer read(String s) {
+            return Integer.parseInt(s);
         }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+    };
+
+    public static final Codec<Integer> CODEC_INT_HEX = new Codec<Integer>() {
+        @Override public Class<Integer> getObjectClass() {
+            return Integer.class;
+        }
+        @Override public String write(Integer obj) {
+            return Integer.toHexString(obj);
+        }
+        @Override public Integer read(String s) {
+            return Integer.parseInt(s, 16);
         }
     };
 
     public static final Codec<Long> CODEC_LONG = new Codec<Long>() {
-        @Override
-        public Class<Long> getObjectClass() {
+        @Override public Class<Long> getObjectClass() {
             return Long.class;
         }
-        @Override
-        public CharSequence write(Long obj) {
+        @Override public String write(Long obj) {
             return Long.toString(obj);
         }
-        @Override
-        public Long read(CharSequence s) {
-            return Long.parseLong(s.toString());
-        }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
-        }
-    };
-
-    public static final Codec<Float> CODEC_FLOAT = new Codec<Float>() {
-        @Override
-        public Class<Float> getObjectClass() {
-            return Float.class;
-        }
-        @Override
-        public CharSequence write(Float obj) {
-            return Float.toString(obj);
-        }
-        @Override
-        public Float read(CharSequence s) {
-            return Float.parseFloat(s.toString());
-        }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+        @Override public Long read(String s) {
+            return Long.parseLong(s);
         }
     };
 
     public static final Codec<Long> CODEC_LONG_HEX = new Codec<Long>() {
-        @Override
-        public Class<Long> getObjectClass() {
+        @Override public Class<Long> getObjectClass() {
             return Long.class;
         }
-        @Override
-        public CharSequence write(Long obj) {
+        @Override public String write(Long obj) {
             return String.format("%016x", obj);
         }
-        @Override
-        public Long read(CharSequence s) {
-            return Long.parseLong(s.toString(), 16);
-        }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+        @Override public Long read(String s) {
+            return Long.parseLong(s, 16);
         }
     };
 
-    public static final Codec<Byte[]> CODEC_BYTE_ARRAY = new Codec<Byte[]>() {
-        @Override
-        public Class<Byte[]> getObjectClass() {
-            return Byte[].class;
+    public static final Codec<Float> CODEC_FLOAT = new Codec<Float>() {
+        @Override public Class<Float> getObjectClass() {
+            return Float.class;
         }
-        @Override
-        public CharSequence write(Byte[] obj) {
-            return StringUtils.bytesToString(obj);
+        @Override public String write(Float obj) {
+            return Float.toString(obj);
         }
-        @Override
-        public Byte[] read(CharSequence s) {
-            return StringUtils.stringToBoxedBytes(s);
-        }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+        @Override public Float read(String s) {
+            return Float.parseFloat(s);
         }
     };
 
-    public static final Codec<UUID> CODEC_UUID_HEX = new Codec<UUID>() {
-        @Override
-        public Class<UUID> getObjectClass() {
-            return UUID.class;
+    public static final Codec<byte[]> CODEC_BYTE_ARRAY = new Codec<byte[]>() {
+        @Override public Class<byte[]> getObjectClass() {
+            return byte[].class;
         }
-        @Override
-        public CharSequence write(UUID obj) {
-            long mostSig, leastSig;
-            mostSig = obj.getMostSignificantBits();
-            leastSig = obj.getLeastSignificantBits();
-            return CODEC_LONG_HEX.write(mostSig).toString() + CODEC_LONG_HEX.write(leastSig);
+        @Override public String write(byte[] obj) {
+            return StringUtils.bytesToHexString(obj);
         }
-        @Override
-        public UUID read(CharSequence s) {
-            long mostSig, leastSig;
-            mostSig = CODEC_LONG_HEX.read(s.subSequence(0, s.length() / 2));
-            leastSig = CODEC_LONG_HEX.read(s.subSequence(s.length() / 2 + 1, s.length()));
-            return new UUID(mostSig, leastSig);
-        }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+        @Override public byte[] read(String s) {
+            return StringUtils.hexStringToBytes(s);
         }
     };
 
     public static final Codec<UUID> CODEC_UUID_STRING = new Codec<UUID>() {
-        @Override
-        public Class<UUID> getObjectClass() {
+        @Override public Class<UUID> getObjectClass() {
             return UUID.class;
         }
-        @Override
-        public CharSequence write(UUID obj) {
+        @Override public String write(UUID obj) {
             return obj.toString();
         }
-        @Override
-        public UUID read(CharSequence s) {
-            return UUID.fromString(s.toString());
+        @Override public UUID read(String s) {
+            return UUID.fromString(s);
         }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+    };
+
+    public static final Codec<UUID> CODEC_UUID_HEX = new Codec<UUID>() {
+        @Override public Class<UUID> getObjectClass() {
+            return UUID.class;
+        }
+        @Override public String write(UUID obj) {
+            long mostSig, leastSig;
+            mostSig = obj.getMostSignificantBits();
+            leastSig = obj.getLeastSignificantBits();
+            return CODEC_LONG_HEX.write(mostSig) + CODEC_LONG_HEX.write(leastSig);
+        }
+        @Override public UUID read(String s) {
+            assert s.length() == 32;
+            long mostSig, leastSig;
+            mostSig = CODEC_LONG_HEX.read(s.substring(0, 16));
+            leastSig = CODEC_LONG_HEX.read(s.substring(17));
+            return new UUID(mostSig, leastSig);
         }
     };
 
     public static final Codec<Date> CODEC_DATE_LONG = new Codec<Date>() {
-        @Override
-        public Class<Date> getObjectClass() {
+        @Override public Class<Date> getObjectClass() {
             return Date.class;
         }
-        @Override
-        public CharSequence write(Date obj) {
+        @Override public String write(Date obj) {
             return CODEC_LONG.write(obj.getTime());
         }
-        @Override
-        public Date read(CharSequence s) {
+        @Override public Date read(String s) {
             return new Date(CODEC_LONG.read(s));
-        }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
         }
     };
 
     public static final Codec<Date> CODEC_DATE_STRING = new Codec<Date>() {
         private final SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd-kk:mm:ss:SS");
         private final ParsePosition parsePosition = new ParsePosition(0);
-        @Override
-        public Class<Date> getObjectClass() {
+
+        @Override public Class<Date> getObjectClass() {
             return Date.class;
         }
-        @Override
-        public CharSequence write(Date obj) {
+        @Override public String write(Date obj) {
             return format.format(obj);
         }
-        @Override
-        public Date read(CharSequence s) {
-            return format.parse(s.toString(), parsePosition);
+        @Override public Date read(String s) {
+            return format.parse(s, parsePosition);
         }
-        @Override
-        public boolean requiresSanitation() {
-            return false;
+    };
+
+    public static final Codec<InetAddress> CODEC_INET_ADDRESS_STRING = new Codec<InetAddress>() {
+        @Override public Class<InetAddress> getObjectClass() {
+            return InetAddress.class;
+        }
+        @Override public String write(InetAddress obj) {
+            return obj.getHostAddress();
+        }
+        @Override public InetAddress read(String s) {
+            try {
+                return InetAddress.getByName(s);
+            } catch (UnknownHostException e) {
+                throw new InvalidSyntaxException(e.getMessage(), s);
+            }
+        }
+    };
+
+    public static final Codec<InetAddress> CODEC_INET_ADDRESS_BYTE_ARRAY = new Codec<InetAddress>() {
+        @Override public Class<InetAddress> getObjectClass() {
+            return InetAddress.class;
+        }
+        @Override public String write(InetAddress obj) {
+            return CODEC_BYTE_ARRAY.write(obj.getAddress());
+        }
+        @Override public InetAddress read(String s) {
+            try {
+                return InetAddress.getByAddress(CODEC_BYTE_ARRAY.read(s));
+            } catch (UnknownHostException e) {
+                throw new InvalidSyntaxException(e.getMessage(), s);
+            }
         }
     };
 

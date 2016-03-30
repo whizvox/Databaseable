@@ -6,12 +6,21 @@ import java.io.OutputStream;
 
 public abstract class SaveFormat {
 
-    public static final String SANITIZED_OBJ_DEFAULT = "{O}", SANITIZED_ROW_DEFAULT = "{R}";
-    public static final char SEPARATOR_OBJ_DEFAULT = ';', SEPARATOR_ROW_DEFAULT = '\n';
+    public static final char
+            SEPARATOR_OBJ_DEFAULT = ';',
+            SEPARATOR_ROW_DEFAULT = '\n';
+    public static final String
+            SANITIZED_OBJ_DEFAULT = "{O}",
+            SANITIZED_ROW_DEFAULT = "{R}",
+            NULL_STRING_DEFAULT = "%NULL%";
 
-    private String objSeparatorReplacer = SANITIZED_OBJ_DEFAULT, rowSeparatorReplacer = SANITIZED_ROW_DEFAULT;
-    private char objSeparator = SEPARATOR_OBJ_DEFAULT, rowSeparator = SEPARATOR_ROW_DEFAULT;
-    private StringBuilder builder = new StringBuilder();
+    private char
+            objSeparator = SEPARATOR_OBJ_DEFAULT,
+            rowSeparator = SEPARATOR_ROW_DEFAULT;
+    private String
+            objSeparatorReplacer = SANITIZED_OBJ_DEFAULT,
+            rowSeparatorReplacer = SANITIZED_ROW_DEFAULT,
+            nullString           = NULL_STRING_DEFAULT;
 
     public SaveFormat() {
 
@@ -39,6 +48,11 @@ public abstract class SaveFormat {
         return this;
     }
 
+    public SaveFormat setNullString(String s) {
+        nullString = s;
+        return this;
+    }
+
     public final char getObjectSeparator() {
         return objSeparator;
     }
@@ -55,7 +69,11 @@ public abstract class SaveFormat {
         return rowSeparatorReplacer;
     }
 
-    public CharSequence sanitize(CharSequence s) {
+    public String getNullString() {
+        return nullString;
+    }
+
+    public String sanitize(String s) {
         final StringBuilder sb = new StringBuilder(s.length());
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
@@ -67,10 +85,10 @@ public abstract class SaveFormat {
                 sb.append(c);
             }
         }
-        return sb;
+        return sb.toString();
     }
 
-    public CharSequence revertSanitizing(CharSequence s) {
+    public String revertSanitizing(String s) {
         final StringBuilder sb = new StringBuilder(s.length());
         int len = Math.max(objSeparatorReplacer.length(), rowSeparatorReplacer.length());
         for (int i = 0; i < s.length() - len; i++) {
@@ -88,10 +106,14 @@ public abstract class SaveFormat {
                 sb.append(s.subSequence(s.length() - len, s.length()));
             }
         }
-        return sb;
+        return sb.toString();
     }
 
-    public abstract void write(OutputStream out, Database<? extends Row> database) throws IOException;
+    public boolean isNullString(String s) {
+        return nullString.equals(s);
+    }
+
+    public abstract <T extends Row> void write(OutputStream out, Database<T> database) throws IOException;
 
     public abstract <T extends Row> void read(InputStream in, Database<T> database) throws IOException;
 

@@ -16,6 +16,10 @@ public class Row {
         return this;
     }
 
+    public Row allocate(int size) {
+        return setObjects(new Object[size]);
+    }
+
     public final int count() {
         return objs.length;
     }
@@ -28,6 +32,12 @@ public class Row {
         final Object obj = objs[columnIndex];
         objs[columnIndex] = null;
         return obj;
+    }
+
+    public Object replace(int columnIndex, Object newObj) {
+        Object oldObj = remove(columnIndex);
+        set(columnIndex, newObj);
+        return oldObj;
     }
 
     public Object getObject(int index) {

@@ -219,7 +219,7 @@ public class Database<T extends Row> {
     }
 
     public void save() {
-        try (OutputStream out = source.genOutputStream()) {
+        try (OutputStream out = source.generateOutputStream()) {
             save(out);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -240,7 +240,7 @@ public class Database<T extends Row> {
     }
 
     public void load() {
-        try (InputStream in = source.genInputStream()) {
+        try (InputStream in = source.generateInputStream()) {
             load(in);
         } catch (IOException e) {
             throw new RuntimeException(e);

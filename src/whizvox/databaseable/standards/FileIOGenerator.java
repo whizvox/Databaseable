@@ -10,13 +10,11 @@ public final class FileIOGenerator extends IOGenerator<File> {
         super(seed);
     }
 
-    @Override
-    public OutputStream genOutputStream() throws IOException {
+    @Override public OutputStream generateOutputStream() throws IOException {
         return new FileOutputStream(getSeed());
     }
 
-    @Override
-    public InputStream genInputStream() throws IOException {
+    @Override public InputStream generateInputStream() throws IOException {
         return new FileInputStream(getSeed());
     }
 

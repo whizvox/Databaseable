@@ -16,8 +16,8 @@ public abstract class IOGenerator<T> {
         return seed;
     }
 
-    public abstract OutputStream genOutputStream() throws IOException;
+    public abstract OutputStream generateOutputStream() throws IOException;
 
-    public abstract InputStream genInputStream() throws IOException;
+    public abstract InputStream generateInputStream() throws IOException;
 
 }

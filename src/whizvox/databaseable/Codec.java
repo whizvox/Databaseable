@@ -4,10 +4,12 @@ public interface Codec<T> {
 
     Class<T> getObjectClass();
 
-    CharSequence write(T obj);
+    String write(T obj);
 
-    T read(CharSequence s);
+    T read(String s);
 
-    boolean requiresSanitation();
+    default boolean requiresSanitation() {
+        return false;
+    }
 
 }

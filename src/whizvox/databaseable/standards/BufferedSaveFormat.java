@@ -23,65 +23,69 @@ public class BufferedSaveFormat extends SaveFormat {
         this(BUFFER_SIZE_DEFAULT);
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public void write(OutputStream out, Database<? extends Row> database) throws IOException {
+    @Override public <T extends Row> void write(OutputStream out, Database<T> database) throws IOException {
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
-        CharBuffer buf = CharBuffer.allocate(bufferSize);
+        CharBuffer charBuffer = CharBuffer.allocate(bufferSize);
         for (int i = 0; i < database.size(); i++) {
             Row row = database.getFromIndex(i);
             for (int j = 0; j < database.columnCount; j++) {
                 Codec codec = database.getCodec(j);
-                if (codec.requiresSanitation()) {
-                    buf.append(sanitize(codec.write(row.getObject(j))));
+                Object obj = row.getObject(j);
+                if (obj == null) {
+                    charBuffer.append(getNullString());
+                } else if (codec.requiresSanitation()) {
+                    charBuffer.append(sanitize(codec.write(obj)));
                 } else {
-                    buf.append(codec.write(row.getObject(j)));
+                    charBuffer.append(codec.write(obj));
                 }
                 if (j < database.columnCount - 1) {
-                    buf.append(getObjectSeparator());
+                    charBuffer.append(getObjectSeparator());
                 }
             }
-            buf.append(getRowSeparator());
-            int pos = buf.position();
-            buf.rewind();
-            writer.append(buf.subSequence(0, pos));
-            buf.clear();
+            charBuffer.append(getRowSeparator());
+            int pos = charBuffer.position();
+            charBuffer.rewind();
+            writer.append(charBuffer.subSequence(0, pos));
+            charBuffer.clear();
         }
         writer.close();
     }
 
-    @Override
-    public <T extends Row> void read(InputStream in, Database<T> database) throws IOException {
-        CharBuffer buf = CharBuffer.allocate(bufferSize);
+    @Override public <T extends Row> void read(InputStream in, Database<T> database) throws IOException {
+        CharBuffer charBuffer = CharBuffer.allocate(bufferSize);
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         int read, index = 0;
         while ((read = reader.read()) != -1) {
             char c = (char) read;
             if (c == getRowSeparator()) {
-                buf.rewind();
-                CharSequence s = buf.subSequence(0, index);
-                CharSequence[] objsStr = StringUtils.splitAtChar(s, getObjectSeparator(), database.columnCount);
+                charBuffer.rewind();
+                String s = charBuffer.subSequence(0, index).toString();
+                String[] objsStr = StringUtils.splitAtChar(s, getObjectSeparator(), database.columnCount);
                 T row;
                 try {
                     row = database.rowClass.newInstance();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                row.setObjects(new Object[database.columnCount]);
+                row.allocate(database.columnCount);
                 for (int i = 0; i < objsStr.length; i++) {
+                    String objStr = objsStr[i];
                     Codec codec = database.getCodec(i);
-                    if (codec.requiresSanitation()) {
-                        row.set(i, codec.read(revertSanitizing(objsStr[i])));
+                    if (getNullString().equals(objStr)) {
+                        row.set(i, null);
+                    } else if (codec.requiresSanitation()) {
+                        row.set(i, codec.read(revertSanitizing(objStr)));
                     } else {
-                        row.set(i, codec.read(objsStr[i]));
+                        row.set(i, codec.read(objStr));
                     }
                 }
                 database.add(row);
-                buf.clear();
+                charBuffer.clear();
                 index = 0;
                 continue;
             }
-            buf.put(c);
+            charBuffer.put(c);
             index++;
         }
         reader.close();

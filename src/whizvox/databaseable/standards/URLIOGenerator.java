@@ -13,13 +13,11 @@ public final class URLIOGenerator extends IOGenerator<URL> {
         super(seed);
     }
 
-    @Override
-    public OutputStream genOutputStream() throws IOException {
+    @Override public OutputStream generateOutputStream() throws IOException {
         return getSeed().openConnection().getOutputStream();
     }
 
-    @Override
-    public InputStream genInputStream() throws IOException {
+    @Override public InputStream generateInputStream() throws IOException {
         return getSeed().openStream();
     }
 

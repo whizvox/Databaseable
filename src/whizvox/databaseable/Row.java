@@ -2,46 +2,36 @@ package whizvox.databaseable;
 
 public class Row {
 
-    private Object[] objs;
+    private Object[] objects;
 
-    /**
-     * All instances of this REQUIRE an empty constructor
-     */
-    public Row() {
-
+    public Row(Object... objects) {
+        assert objects.length > 0;
+        this.objects = objects;
     }
 
-    public Row setObjects(Object... objs) {
-        this.objs = objs;
-        return this;
+    public Row(int size) {
+        this(new Object[size]);
     }
 
-    public Row allocate(int size) {
-        return setObjects(new Object[size]);
+    public final int size() {
+        return objects.length;
     }
 
-    public final int count() {
-        return objs.length;
+    protected final void checkIndex(int index) {
+        if (index < 0 || index >= size()) {
+            throw new IllegalArgumentException(String.format("Index is not within bounds of [0,%d]: %d", size() - 1, index));
+        }
     }
 
-    public void set(int columnIndex, Object obj) {
-        objs[columnIndex] = obj;
+    public Object get(int index) {
+        checkIndex(index);
+        return objects[index];
     }
 
-    public Object remove(int columnIndex) {
-        final Object obj = objs[columnIndex];
-        objs[columnIndex] = null;
-        return obj;
-    }
-
-    public Object replace(int columnIndex, Object newObj) {
-        Object oldObj = remove(columnIndex);
-        set(columnIndex, newObj);
-        return oldObj;
-    }
-
-    public Object getObject(int index) {
-        return objs[index];
+    public Object setObject(int index, Object newObject) {
+        Object old = get(index);
+        objects[index] = newObject;
+        return old;
     }
 
 }

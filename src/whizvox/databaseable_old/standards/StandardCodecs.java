@@ -1,9 +1,8 @@
-package whizvox.databaseable.standards;
+package whizvox.databaseable_old.standards;
 
-import whizvox.databaseable.Codec;
-import whizvox.databaseable.DbArray;
-import whizvox.databaseable.InvalidSyntaxException;
-import whizvox.databaseable.StringUtils;
+import whizvox.databaseable_old.Codec;
+import whizvox.databaseable_old.InvalidSyntaxException;
+import whizvox.databaseable_old.StringUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

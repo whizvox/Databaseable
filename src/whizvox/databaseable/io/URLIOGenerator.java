@@ -1,6 +1,4 @@
-package whizvox.databaseable.standards;
-
-import whizvox.databaseable.IOGenerator;
+package whizvox.databaseable.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -13,11 +11,13 @@ public final class URLIOGenerator extends IOGenerator<URL> {
         super(seed);
     }
 
-    @Override public OutputStream generateOutputStream() throws IOException {
+    @Override
+    public OutputStream generateOutputStream() throws IOException {
         return getSeed().openConnection().getOutputStream();
     }
 
-    @Override public InputStream generateInputStream() throws IOException {
+    @Override
+    public InputStream generateInputStream() throws IOException {
         return getSeed().openStream();
     }
 

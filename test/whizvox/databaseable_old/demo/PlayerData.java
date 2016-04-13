@@ -1,6 +1,6 @@
-package whizvox.databaseable.demo;
+package whizvox.databaseable_old.demo;
 
-import whizvox.databaseable.Row;
+import whizvox.databaseable_old.Row;
 
 import java.util.Date;
 import java.util.UUID;

@@ -1,16 +1,16 @@
-package whizvox.databaseable.demo;
+package whizvox.databaseable_old.demo;
 
-import whizvox.databaseable.Database;
-import whizvox.databaseable.standards.FileIOGenerator;
+import whizvox.databaseable_old.Database;
+import whizvox.databaseable_old.standards.FileIOGenerator;
 
 import java.io.File;
 import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
-import static whizvox.databaseable.standards.StandardCodecs.*;
+import static whizvox.databaseable_old.standards.StandardCodecs.*;
 
-public class StressTesting {
+public class Benchmark {
 
     public static void main(String[] args) throws Exception {
 

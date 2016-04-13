@@ -1,4 +1,6 @@
-package whizvox.databaseable;
+package whizvox.databaseable.io;
+
+import whizvox.databaseable.Database;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +12,11 @@ public abstract class IOGenerator<T> {
 
     public IOGenerator(T seed) {
         this.seed = seed;
+    }
+
+    public final IOGenerator<T> setSeed(T newSeed) {
+        seed = newSeed;
+        return this;
     }
 
     public final T getSeed() {

@@ -1,6 +1,6 @@
-package whizvox.databaseable.standards;
+package whizvox.databaseable_old.standards;
 
-import whizvox.databaseable.IOGenerator;
+import whizvox.databaseable_old.IOGenerator;
 
 import java.io.*;
 

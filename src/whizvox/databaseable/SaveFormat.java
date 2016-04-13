@@ -1,120 +1,93 @@
 package whizvox.databaseable;
 
+import whizvox.databaseable.codec.DbCodec;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.Date;
 
-public abstract class SaveFormat {
+import static whizvox.databaseable.codec.StandardCodecs.*;
 
-    public static final char
-            SEPARATOR_OBJ_DEFAULT = ';',
-            SEPARATOR_ROW_DEFAULT = '\n';
-    public static final String
-            SANITIZED_OBJ_DEFAULT = "{O}",
-            SANITIZED_ROW_DEFAULT = "{R}",
-            NULL_STRING_DEFAULT = "%NULL%";
+public class SaveFormat {
 
-    private char
-            objSeparator = SEPARATOR_OBJ_DEFAULT,
-            rowSeparator = SEPARATOR_ROW_DEFAULT;
-    private String
-            objSeparatorReplacer = SANITIZED_OBJ_DEFAULT,
-            rowSeparatorReplacer = SANITIZED_ROW_DEFAULT,
-            nullString           = NULL_STRING_DEFAULT;
+    private static final int DEFAULT_BUFFER_SIZE = 1024;
+
+    private byte[] buf;
+    private ByteBuffer buffer;
+    public final int bufferSize;
+
+    public SaveFormat(int bufferSize) {
+        this.bufferSize = bufferSize;
+    }
 
     public SaveFormat() {
-
+        this(DEFAULT_BUFFER_SIZE);
     }
 
-    public SaveFormat setObjectSeparator(char objectSeparator) {
-        assert objSeparatorReplacer.indexOf(objectSeparator) == -1;
-        this.objSeparator = objectSeparator;
+    public SaveFormat allocate() {
+        buf = new byte[bufferSize];
+        buffer = ByteBuffer.wrap(buf);
         return this;
     }
 
-    public SaveFormat setRowSeparator(char rowSeparator) {
-        assert rowSeparatorReplacer.indexOf(rowSeparator) == -1;
-        this.rowSeparator = rowSeparator;
-        return this;
-    }
-
-    public SaveFormat setObjectSeparatorReplacer(String s) {
-        objSeparatorReplacer = s;
-        return this;
-    }
-
-    public SaveFormat setRowSeparatorReplacer(String s) {
-        rowSeparatorReplacer = s;
-        return this;
-    }
-
-    public SaveFormat setNullString(String s) {
-        nullString = s;
-        return this;
-    }
-
-    public final char getObjectSeparator() {
-        return objSeparator;
-    }
-
-    public final char getRowSeparator() {
-        return rowSeparator;
-    }
-
-    public String getObjectSeparatorReplacer() {
-        return objSeparatorReplacer;
-    }
-
-    public String getRowSeparatorReplacer() {
-        return rowSeparatorReplacer;
-    }
-
-    public String getNullString() {
-        return nullString;
-    }
-
-    public String sanitize(String s) {
-        final StringBuilder sb = new StringBuilder(s.length());
-        for (int i = 0; i < s.length(); i++) {
-            char c = s.charAt(i);
-            if (c == objSeparator) {
-                sb.append(objSeparatorReplacer);
-            } else if (c == rowSeparator) {
-                sb.append(rowSeparatorReplacer);
-            } else {
-                sb.append(c);
-            }
+    protected final void checkInit() {
+        if (buf == null) {
+            allocate();
         }
-        return sb.toString();
     }
 
-    public String revertSanitizing(String s) {
-        final StringBuilder sb = new StringBuilder(s.length());
-        int len = Math.max(objSeparatorReplacer.length(), rowSeparatorReplacer.length());
-        for (int i = 0; i < s.length() - len; i++) {
-            String subSeq = s.subSequence(i, i + len).toString();
-            if (subSeq.startsWith(objSeparatorReplacer)) {
-                sb.append(objSeparator);
-                i += objSeparatorReplacer.length() - 1;
-            } else if (subSeq.startsWith(rowSeparatorReplacer)) {
-                sb.append(rowSeparator);
-                i += rowSeparatorReplacer.length() - 1;
-            } else {
-                sb.append(s.charAt(i));
+    public void save(Database database, OutputStream out) throws IOException {
+        checkInit();
+
+        CODEC_INT.write(buffer, database.getVersion());
+        CODEC_INT.write(buffer, database.getColumnCount());
+        CODEC_DATE.write(buffer, new Date());
+        CODEC_ARRAY_STRING_16BIT.write(buffer, database.getNames());
+
+        out.write(buf, 0, buffer.position());
+
+        for (int i = 0; i < database.getRowCount(); i++) {
+            buffer.flip();
+            Row row = database.get(i);
+            for (int j = 0; j < database.getColumnCount(); j++) {
+                database.getCodecs()[j].write(buffer, row);
             }
-            if (i == s.length() - len - 1) {
-                sb.append(s.subSequence(s.length() - len, s.length()));
-            }
+            out.write(buf, 0, buffer.position());
         }
-        return sb.toString();
     }
 
-    public boolean isNullString(String s) {
-        return nullString.equals(s);
+    public <T extends Row> void load(Database<T> database, InputStream in) throws IOException {
+        checkInit();
+
+        in.read(buf, 0, buf.length);
+        int version = CODEC_INT.read(buffer);
+        int columnCount = CODEC_INT.read(buffer);
+        Date lastSaved = CODEC_DATE.read(buffer);
+        String[] names = CODEC_ARRAY_STRING_16BIT.read(buffer);
+
+        database.checkVersion(version);
+        database.setColumnCount(columnCount);
+        database.setLastSaved(lastSaved);
+        database.setColumnNames(names);
+        try {
+            while (rotate(in) != -1) {
+                T row = database.getRowClass().newInstance();
+                for (int i = 0; i < database.getColumnCount(); i++) {
+                    DbCodec codec = database.getCodecs()[i];
+                    row.setObject(i, codec.read(buffer));
+                }
+                database.add(row);
+            }
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new InvalidDataException(e);
+        }
     }
 
-    public abstract <T extends Row> void write(OutputStream out, Database<T> database) throws IOException;
-
-    public abstract <T extends Row> void read(InputStream in, Database<T> database) throws IOException;
+    private int rotate(InputStream in) throws IOException {
+        System.arraycopy(buf, buffer.position(), buf, 0, buffer.remaining());
+        return in.read(buf, buffer.position(), buffer.remaining());
+    }
 
 }

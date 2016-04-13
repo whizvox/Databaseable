@@ -1,12 +1,12 @@
-package whizvox.databaseable.standards;
+package whizvox.databaseable_old.standards;
 
-import whizvox.databaseable.DbArray;
+import whizvox.databaseable_old.DbArray;
 
 import java.net.InetAddress;
 import java.util.Date;
 import java.util.UUID;
 
-import static whizvox.databaseable.standards.StandardCodecs.*;
+import static whizvox.databaseable_old.standards.StandardCodecs.*;
 
 public class DbArrays {
 

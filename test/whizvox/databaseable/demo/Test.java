@@ -4,10 +4,8 @@ import whizvox.databaseable.Database;
 import whizvox.databaseable.io.FileIOGenerator;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
+import java.util.Random;
+import java.util.UUID;
 
 import static whizvox.databaseable.codec.StandardCodecs.*;
 
@@ -21,7 +19,21 @@ public class Test {
                 .setDefaultSaveFormat()
                 .setIOGenerator(new FileIOGenerator(new File("test.dbab")));
 
-
+        byte[] randBytes = new byte[32];
+        Random rand = new Random();
+        long t1, t2;
+        t1 = System.currentTimeMillis();
+        for (int i = 0; i < 5000000; i++) {
+            rand.nextBytes(randBytes);
+            UserData data = new UserData(UUID.randomUUID(), "player" + i, "password hint " + i, randBytes, randBytes);
+            db.add(data);
+        }
+        t2 = System.currentTimeMillis();
+        System.out.println("Adding: " + (t2 - t1) + " ms");
+        t1 = System.currentTimeMillis();
+        db.save();
+        t2 = System.currentTimeMillis();
+        System.out.println("Saving: " + (t2 - t1) + " ms");
 
     }
 

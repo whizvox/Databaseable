@@ -49,10 +49,10 @@ public class SaveFormat {
         out.write(buf, 0, buffer.position());
 
         for (int i = 0; i < database.getRowCount(); i++) {
-            buffer.flip();
+            buffer.rewind();
             Row row = database.get(i);
             for (int j = 0; j < database.getColumnCount(); j++) {
-                database.getCodecs()[j].write(buffer, row);
+                database.getCodecs()[j].write(buffer, row.get(j));
             }
             out.write(buf, 0, buffer.position());
         }

@@ -11,7 +11,7 @@ public class UserData extends Row {
     }
 
     public UserData(UUID id, String username, String passwordHint, byte[] hashedPassword, byte[] passwordSalt) {
-        super(id, username, hashedPassword, passwordSalt);
+        super(id, username, passwordHint, hashedPassword, passwordSalt);
     }
 
     public UUID getId() {

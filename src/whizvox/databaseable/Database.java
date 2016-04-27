@@ -1,6 +1,6 @@
 package whizvox.databaseable;
 
-import whizvox.databaseable.codec.DbCodec;
+import whizvox.databaseable.codec.DataCodec;
 import whizvox.databaseable.io.FileIOGenerator;
 import whizvox.databaseable.io.IOGenerator;
 
@@ -14,7 +14,7 @@ public class Database<T extends Row> {
     private List<T> rows = new ArrayList<>();
     private int keyColumn = 0, version = 0;
     private String[] names;
-    private DbCodec[] codecs;
+    private DataCodec[] codecs;
     private IOGenerator ioGenerator = null;
     private SaveFormat saveFormat;
     private final Class<T> rowClass;
@@ -71,9 +71,9 @@ public class Database<T extends Row> {
         return this;
     }
 
-    public Database<T> setCodecs(DbCodec... codecs) {
+    public Database<T> setCodecs(DataCodec... codecs) {
         assert columnCount == codecs.length;
-        this.codecs = new DbCodec[columnCount];
+        this.codecs = new DataCodec[columnCount];
         System.arraycopy(codecs, 0, this.codecs, 0, columnCount);
         return this;
     }
@@ -121,6 +121,10 @@ public class Database<T extends Row> {
         rows.add(row);
     }
 
+    public void clear() {
+        rows.clear();
+    }
+
     public void save(OutputStream out) throws IOException {
         saveFormat.save(this, out);
     }
@@ -153,7 +157,7 @@ public class Database<T extends Row> {
         return names;
     }
 
-    protected DbCodec[] getCodecs() {
+    protected DataCodec[] getCodecs() {
         return codecs;
     }
 

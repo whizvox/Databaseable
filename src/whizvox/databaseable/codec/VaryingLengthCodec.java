@@ -1,42 +1,33 @@
 package whizvox.databaseable.codec;
 
+import whizvox.databaseable.Databaseable;
 import whizvox.databaseable.InvalidDataException;
+import whizvox.databaseable.io.ByteReader;
+import whizvox.databaseable.io.ByteWriter;
 
-import java.nio.ByteBuffer;
+public abstract class VaryingLengthCodec<T> implements DataCodec<T> {
 
-public abstract class VaryingLengthCodec<T> implements DbCodec<T> {
+    public abstract int size(T obj);
 
-    @Override
-    public final boolean lengthCanVary() {
-        return true;
+    @Override public final void write(ByteWriter writer, T obj) {
+        int size = size(obj);
+        if (size < 0 || size > Databaseable.MAX_DATA_SIZE) {
+            throw new InvalidDataException(String.format("Varying data size not within bounds of [0,%d]: %d", Databaseable.MAX_DATA_SIZE, size));
+        }
+        writer.write(size);
+        write_do(writer, obj);
     }
 
-    @Override
-    public final int length() {
-        throw new UnsupportedOperationException();
+    protected abstract void write_do(ByteWriter writer, T obj);
+
+    @Override public final T read(ByteReader reader) throws InvalidDataException {
+        int size = reader.readInt();
+        if (size < 0 || size > Databaseable.MAX_DATA_SIZE) {
+            throw new InvalidDataException(String.format("Varying data size not within bounds of [0,%d]: %d", Databaseable.MAX_DATA_SIZE, size));
+        }
+        return read_do(size, reader);
     }
 
-    public abstract int length(T obj);
-
-    /* Number of elements in the varying object. Used for lists and arrays. */
-    public int size(T obj) {
-        return length(obj);
-    }
-
-    @Override
-    public final void write(ByteBuffer buffer, T obj) {
-        buffer.putInt(size(obj));
-        write_do(buffer, obj);
-    }
-
-    protected abstract void write_do(ByteBuffer buffer, T obj);
-
-    @Override
-    public final T read(ByteBuffer buffer) throws InvalidDataException {
-        int size = buffer.getInt();
-        return read_do(size, buffer);
-    }
-
-    protected abstract T read_do(int size, ByteBuffer buffer) throws InvalidDataException;
+    protected abstract T read_do(int size, ByteReader reader) throws InvalidDataException;
 
 }

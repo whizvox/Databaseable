@@ -1,11 +1,11 @@
 package whizvox.databaseable.codec;
 
 import whizvox.databaseable.InvalidDataException;
+import whizvox.databaseable.io.ByteReader;
+import whizvox.databaseable.io.ByteWriter;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -14,15 +14,12 @@ public class StandardCodecs {
 
     private StandardCodecs() {}
 
-    public static final DbCodec<Boolean> CODEC_BOOL = new DbCodec<Boolean>() {
-        @Override public int length() {
-            return 1;
+    public static final DataCodec<Boolean> CODEC_BOOL = new DataCodec<Boolean>() {
+        @Override public void write(ByteWriter writer, Boolean obj) {
+            writer.write((byte) (obj ? 1 : 0));
         }
-        @Override public void write(ByteBuffer buffer, Boolean obj) {
-            buffer.put((byte) (obj ? 1 : 0));
-        }
-        @Override public Boolean read(ByteBuffer buffer) throws InvalidDataException {
-            byte b = buffer.get();
+        @Override public Boolean read(ByteReader reader) throws InvalidDataException {
+            byte b = reader.read();
             if (b == 0) {
                 return false;
             } else if (b == 1) {
@@ -32,125 +29,94 @@ public class StandardCodecs {
         }
     };
 
-    public static final DbCodec<Byte> CODEC_BYTE = new DbCodec<Byte>() {
-        @Override public int length() {
-            return Byte.BYTES;
+    public static final DataCodec<Byte> CODEC_BYTE = new DataCodec<Byte>() {
+        @Override public void write(ByteWriter writer, Byte obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Byte obj) {
-            buffer.put(obj);
-        }
-        @Override public Byte read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.get();
+        @Override public Byte read(ByteReader reader) throws InvalidDataException {
+            return reader.read();
         }
     };
 
-    public static final DbCodec<Short> CODEC_SHORT = new DbCodec<Short>() {
-        @Override public int length() {
-            return Short.BYTES;
+    public static final DataCodec<Short> CODEC_SHORT = new DataCodec<Short>() {
+        @Override public void write(ByteWriter writer, Short obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Short obj) {
-            buffer.putShort(obj);
-        }
-        @Override public Short read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.getShort();
+        @Override public Short read(ByteReader reader) throws InvalidDataException {
+            return reader.readShort();
         }
     };
 
-    public static final DbCodec<Integer> CODEC_INT = new DbCodec<Integer>() {
-        @Override public int length() {
-            return Integer.BYTES;
+    public static final DataCodec<Integer> CODEC_INT = new DataCodec<Integer>() {
+        @Override public void write(ByteWriter writer, Integer obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Integer obj) {
-            buffer.putInt(obj);
-        }
-        @Override public Integer read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.getInt();
+        @Override public Integer read(ByteReader reader) throws InvalidDataException {
+            return reader.readInt();
         }
     };
 
-    public static final DbCodec<Long> CODEC_LONG = new DbCodec<Long>() {
-        @Override public int length() {
-            return Long.BYTES;
+    public static final DataCodec<Long> CODEC_LONG = new DataCodec<Long>() {
+        @Override public void write(ByteWriter writer, Long obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Long obj) {
-            buffer.putLong(obj);
-        }
-        @Override public Long read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.getLong();
+        @Override public Long read(ByteReader reader) throws InvalidDataException {
+            return reader.readLong();
         }
     };
 
-    public static final DbCodec<Float> CODEC_FLOAT = new DbCodec<Float>() {
-        @Override public int length() {
-            return Float.BYTES;
+    public static final DataCodec<Float> CODEC_FLOAT = new DataCodec<Float>() {
+        @Override public void write(ByteWriter writer, Float obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Float obj) {
-            buffer.putFloat(obj);
-        }
-        @Override public Float read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.getFloat();
+        @Override public Float read(ByteReader reader) throws InvalidDataException {
+            return reader.readFloat();
         }
     };
 
-    public static final DbCodec<Double> CODEC_DOUBLE = new DbCodec<Double>() {
-        @Override public int length() {
-            return Double.BYTES;
+    public static final DataCodec<Double> CODEC_DOUBLE = new DataCodec<Double>() {
+        @Override public void write(ByteWriter writer, Double obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Double obj) {
-            buffer.putDouble(obj);
-        }
-        @Override public Double read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.getDouble();
+        @Override public Double read(ByteReader reader) throws InvalidDataException {
+            return reader.readDouble();
         }
     };
 
-    public static final DbCodec<Character> CODEC_CHAR = new DbCodec<Character>() {
-        @Override public int length() {
-            return Character.BYTES;
+    public static final DataCodec<Character> CODEC_CHAR = new DataCodec<Character>() {
+        @Override public void write(ByteWriter writer, Character obj) {
+            writer.write(obj);
         }
-        @Override public void write(ByteBuffer buffer, Character obj) {
-            buffer.putChar(obj);
-        }
-        @Override public Character read(ByteBuffer buffer) throws InvalidDataException {
-            return buffer.getChar();
+        @Override public Character read(ByteReader reader) throws InvalidDataException {
+            return reader.readChar();
         }
     };
 
-    public static final DbCodec<Date> CODEC_DATE = new DbCodec<Date>() {
-        @Override public int length() {
-            return CODEC_LONG.length();
+    public static final DataCodec<Date> CODEC_DATE = new DataCodec<Date>() {
+        @Override public void write(ByteWriter writer, Date obj) {
+            writer.write(obj.getTime());
         }
-        @Override public void write(ByteBuffer buffer, Date obj) {
-            CODEC_LONG.write(buffer, obj.getTime());
-        }
-        @Override public Date read(ByteBuffer buffer) throws InvalidDataException {
-            return new Date(CODEC_LONG.read(buffer));
+        @Override public Date read(ByteReader reader) throws InvalidDataException {
+            return new Date(reader.readLong());
         }
     };
 
-    public static final DbCodec<UUID> CODEC_UUID = new DbCodec<UUID>() {
-        @Override public int length() {
-            return CODEC_LONG.length() * 2;
+    public static final DataCodec<UUID> CODEC_UUID = new DataCodec<UUID>() {
+        @Override public void write(ByteWriter writer, UUID obj) {
+            writer.write(obj.getMostSignificantBits());
+            writer.write(obj.getLeastSignificantBits());
         }
-        @Override public void write(ByteBuffer buffer, UUID obj) {
-            buffer.putLong(obj.getMostSignificantBits());
-            buffer.putLong(obj.getLeastSignificantBits());
-        }
-        @Override public UUID read(ByteBuffer buffer) throws InvalidDataException {
-            return new UUID(buffer.getLong(), buffer.getLong());
+        @Override public UUID read(ByteReader reader) throws InvalidDataException {
+            return new UUID(reader.readLong(), reader.readLong());
         }
     };
 
-    public static final DbCodec<InetAddress> CODEC_INET_ADDRESS = new DbCodec<InetAddress>() {
-        @Override public int length() {
-            return 4;
+    public static final DataCodec<InetAddress> CODEC_INET_ADDRESS = new DataCodec<InetAddress>() {
+        @Override public void write(ByteWriter writer, InetAddress obj) {
+            writer.write(obj.getAddress());
         }
-        @Override public void write(ByteBuffer buffer, InetAddress obj) {
-            buffer.put(obj.getAddress());
-        }
-        @Override public InetAddress read(ByteBuffer buffer) throws InvalidDataException {
-            byte[] addressBuf = new byte[length()];
-            buffer.get(addressBuf);
+        @Override public InetAddress read(ByteReader reader) throws InvalidDataException {
+            byte[] addressBuf = reader.readBytes(4);
             try {
                 return InetAddress.getByAddress(addressBuf);
             } catch (UnknownHostException e) {
@@ -159,330 +125,282 @@ public class StandardCodecs {
         }
     };
 
-    public static final DbCodec<String> CODEC_STRING_8BIT = new VaryingLengthCodec<String>() {
-        @Override
-        public int length(String obj) {
-            return obj.length();
+    public static final DataCodec<String> CODEC_STR8 = new DataCodec<String>() {
+        @Override public void write(ByteWriter writer, String obj) {
+            writer.writeStr8(obj);
         }
-        @Override
-        public int size(String obj) {
-            return obj.length();
-        }
-        @Override
-        protected void write_do(ByteBuffer buffer, String obj) {
-            for (int i = 0; i < obj.length(); i++) {
-                buffer.put((byte) obj.charAt(i));
-            }
-        }
-        @Override
-        protected String read_do(int size, ByteBuffer buffer) throws InvalidDataException {
-            char[] chars = new char[size];
-            for (int i = 0; i < size; i++) {
-                chars[i] = (char) buffer.get();
-            }
-            return new String(chars);
+        @Override public String read(ByteReader reader) throws InvalidDataException {
+            return reader.readStr8().toString();
         }
     };
 
-    public static final DbCodec<String> CODEC_STRING_16BIT = new VaryingLengthCodec<String>() {
-        @Override
-        public int length(String obj) {
-            return obj.length() * 2;
+    public static final DataCodec<String> CODEC_STR16 = new DataCodec<String>() {
+        @Override public void write(ByteWriter writer, String obj) {
+            writer.writeStr16(obj);
         }
-        @Override
-        public int size(String obj) {
-            return obj.length();
-        }
-        @Override
-        protected void write_do(ByteBuffer buffer, String obj) {
-            for (int i = 0; i < obj.length(); i++) {
-                char c = obj.charAt(i);
-                buffer.put((byte) (c >>> 8));
-                buffer.put((byte) c);
-            }
-        }
-        @Override
-        protected String read_do(int size, ByteBuffer buffer) throws InvalidDataException {
-            char[] chars = new char[size];
-            for (int i = 0; i < size; i++) {
-                chars[i] = (char) (buffer.get() << 8 | buffer.get() & 0xff);
-            }
-            return new String(chars);
+        @Override public String read(ByteReader reader) throws InvalidDataException {
+            return reader.readStr16().toString();
         }
     };
 
-    public static final DbCodec<boolean[]> CODEC_ARRAY_BOOL = new VaryingLengthCodec<boolean[]>() {
-        @Override public int length(boolean[] obj) {
+    public static final DataCodec<boolean[]> CODEC_ARRAY_BOOL = new VaryingLengthCodec<boolean[]>() {
+        @Override public int size(boolean[] obj) {
             return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, boolean[] obj) {
+        @Override protected void write_do(ByteWriter writer, boolean[] obj) {
             for (boolean b : obj) {
-                CODEC_BOOL.write(buffer, b);
+                CODEC_BOOL.write(writer, b);
             }
         }
-        @Override protected boolean[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected boolean[] read_do(int size, ByteReader reader) throws InvalidDataException {
             boolean[] bools = new boolean[size];
             for (int i = 0; i < size; i++) {
-                bools[i] = CODEC_BOOL.read(buffer);
+                bools[i] = CODEC_BOOL.read(reader);
             }
             return bools;
         }
     };
 
-    public static final DbCodec<byte[]> CODEC_ARRAY_BYTE = new VaryingLengthCodec<byte[]>() {
-        @Override public int length(byte[] obj) {
+    public static final DataCodec<byte[]> CODEC_ARRAY_BYTE = new VaryingLengthCodec<byte[]>() {
+        @Override public int size(byte[] obj) {
             return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, byte[] obj) {
+        @Override protected void write_do(ByteWriter writer, byte[] obj) {
             for (byte b : obj) {
-                CODEC_BYTE.write(buffer, b);
+                CODEC_BYTE.write(writer, b);
             }
         }
-        @Override protected byte[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected byte[] read_do(int size, ByteReader reader) throws InvalidDataException {
             byte[] bytes = new byte[size];
             for (int i = 0; i < size; i++) {
-                bytes[i] = CODEC_BYTE.read(buffer);
+                bytes[i] = CODEC_BYTE.read(reader);
             }
             return bytes;
         }
     };
 
-    public static final DbCodec<short[]> CODEC_ARRAY_SHORT = new VaryingLengthCodec<short[]>() {
-        @Override public int length(short[] obj) {
-            return obj.length * CODEC_SHORT.length();
+    public static final DataCodec<short[]> CODEC_ARRAY_SHORT = new VaryingLengthCodec<short[]>() {
+        @Override public int size(short[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, short[] obj) {
+        @Override protected void write_do(ByteWriter writer, short[] obj) {
             for (short s : obj) {
-                CODEC_SHORT.write(buffer, s);
+                CODEC_SHORT.write(writer, s);
             }
         }
-        @Override protected short[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected short[] read_do(int size, ByteReader reader) throws InvalidDataException {
             short[] shorts = new short[size];
             for (int i = 0; i < size; i++) {
-                shorts[i] = CODEC_SHORT.read(buffer);
+                shorts[i] = CODEC_SHORT.read(reader);
             }
             return shorts;
         }
     };
 
-    public static final DbCodec<int[]> CODEC_ARRAY_INT = new VaryingLengthCodec<int[]>() {
-        @Override public int length(int[] obj) {
-            return obj.length * CODEC_INT.length();
+    public static final DataCodec<int[]> CODEC_ARRAY_INT = new VaryingLengthCodec<int[]>() {
+        @Override public int size(int[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, int[] obj) {
+        @Override protected void write_do(ByteWriter writer, int[] obj) {
             for (int i : obj) {
-                CODEC_INT.write(buffer, i);
+                CODEC_INT.write(writer, i);
             }
         }
-        @Override protected int[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected int[] read_do(int size, ByteReader reader) throws InvalidDataException {
             int[] ints = new int[size];
             for (int i = 0; i < size; i++) {
-                ints[i] = CODEC_INT.read(buffer);
+                ints[i] = CODEC_INT.read(reader);
             }
             return ints;
         }
     };
 
-    public static final DbCodec<long[]> CODEC_ARRAY_LONG = new VaryingLengthCodec<long[]>() {
-        @Override public int length(long[] obj) {
-            return obj.length * CODEC_LONG.length();
+    public static final DataCodec<long[]> CODEC_ARRAY_LONG = new VaryingLengthCodec<long[]>() {
+        @Override public int size(long[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, long[] obj) {
+        @Override protected void write_do(ByteWriter writer, long[] obj) {
             for (long l : obj) {
-                CODEC_LONG.write(buffer, l);
+                CODEC_LONG.write(writer, l);
             }
         }
-        @Override protected long[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected long[] read_do(int size, ByteReader reader) throws InvalidDataException {
             long[] longs = new long[size];
             for (int i = 0; i < size; i++) {
-                longs[i] = CODEC_LONG.read(buffer);
+                longs[i] = CODEC_LONG.read(reader);
             }
             return longs;
         }
     };
 
-    public static final DbCodec<float[]> CODEC_ARRAY_FLOAT = new VaryingLengthCodec<float[]>() {
-        @Override public int length(float[] obj) {
-            return obj.length * CODEC_FLOAT.length();
+    public static final DataCodec<float[]> CODEC_ARRAY_FLOAT = new VaryingLengthCodec<float[]>() {
+        @Override public int size(float[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, float[] obj) {
+        @Override protected void write_do(ByteWriter writer, float[] obj) {
             for (float f : obj) {
-                CODEC_FLOAT.write(buffer, f);
+                CODEC_FLOAT.write(writer, f);
             }
         }
-        @Override protected float[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected float[] read_do(int size, ByteReader reader) throws InvalidDataException {
             float[] floats = new float[size];
             for (int i = 0; i < size; i++) {
-                floats[i] = CODEC_FLOAT.read(buffer);
+                floats[i] = CODEC_FLOAT.read(reader);
             }
             return floats;
         }
     };
 
-    public static final DbCodec<double[]> CODEC_ARRAY_DOUBLE = new VaryingLengthCodec<double[]>() {
-        @Override public int length(double[] obj) {
-            return obj.length * CODEC_DOUBLE.length();
+    public static final DataCodec<double[]> CODEC_ARRAY_DOUBLE = new VaryingLengthCodec<double[]>() {
+        @Override public int size(double[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, double[] obj) {
+        @Override protected void write_do(ByteWriter writer, double[] obj) {
             for (double d : obj) {
-                CODEC_DOUBLE.write(buffer, d);
+                CODEC_DOUBLE.write(writer, d);
             }
         }
-        @Override protected double[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected double[] read_do(int size, ByteReader reader) throws InvalidDataException {
             double[] doubles = new double[size];
             for (int i = 0; i < size; i++) {
-                doubles[i] = CODEC_DOUBLE.read(buffer);
+                doubles[i] = CODEC_DOUBLE.read(reader);
             }
             return doubles;
         }
     };
 
-    public static final DbCodec<char[]> CODEC_ARRAY_CHAR = new VaryingLengthCodec<char[]>() {
-        @Override public int length(char[] obj) {
-            return obj.length * CODEC_CHAR.length();
+    public static final DataCodec<char[]> CODEC_ARRAY_CHAR = new VaryingLengthCodec<char[]>() {
+        @Override public int size(char[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, char[] obj) {
+        @Override protected void write_do(ByteWriter writer, char[] obj) {
             for (char c : obj) {
-                CODEC_CHAR.write(buffer, c);
+                CODEC_CHAR.write(writer, c);
             }
         }
-        @Override protected char[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected char[] read_do(int size, ByteReader reader) throws InvalidDataException {
             char[] chars = new char[size];
             for (int i = 0; i < size; i++) {
-                chars[i] = CODEC_CHAR.read(buffer);
+                chars[i] = CODEC_CHAR.read(reader);
             }
             return chars;
         }
     };
 
-    public static final DbCodec<Date[]> CODEC_ARRAY_DATE = new VaryingLengthCodec<Date[]>() {
-        @Override public int length(Date[] obj) {
-            return obj.length * CODEC_DATE.length();
+    public static final DataCodec<Date[]> CODEC_ARRAY_DATE = new VaryingLengthCodec<Date[]>() {
+        @Override public int size(Date[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, Date[] obj) {
+        @Override protected void write_do(ByteWriter writer, Date[] obj) {
             for (Date date : obj) {
-                CODEC_DATE.write(buffer, date);
+                CODEC_DATE.write(writer, date);
             }
         }
-        @Override protected Date[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected Date[] read_do(int size, ByteReader reader) throws InvalidDataException {
             Date[] dates = new Date[size];
             for (int i = 0; i < size; i++) {
-                dates[i] = CODEC_DATE.read(buffer);
+                dates[i] = CODEC_DATE.read(reader);
             }
             return dates;
         }
     };
 
-    public static final DbCodec<UUID[]> CODEC_ARRAY_UUID = new VaryingLengthCodec<UUID[]>() {
-        @Override public int length(UUID[] obj) {
-            return obj.length * CODEC_UUID.length();
+    public static final DataCodec<UUID[]> CODEC_ARRAY_UUID = new VaryingLengthCodec<UUID[]>() {
+        @Override public int size(UUID[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, UUID[] obj) {
+        @Override protected void write_do(ByteWriter writer, UUID[] obj) {
             for (UUID uuid : obj) {
-                CODEC_UUID.write(buffer, uuid);
+                CODEC_UUID.write(writer, uuid);
             }
         }
-        @Override protected UUID[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected UUID[] read_do(int size, ByteReader reader) throws InvalidDataException {
             UUID[] uuids = new UUID[size];
             for (int i = 0; i < size; i++) {
-                uuids[i] = CODEC_UUID.read(buffer);
+                uuids[i] = CODEC_UUID.read(reader);
             }
             return uuids;
         }
     };
 
-    public static final DbCodec<InetAddress[]> CODEC_ARRAY_INET_ADDRESS = new VaryingLengthCodec<InetAddress[]>() {
-        @Override public int length(InetAddress[] obj) {
-            return obj.length * CODEC_INET_ADDRESS.length();
+    public static final DataCodec<InetAddress[]> CODEC_ARRAY_INET_ADDRESS = new VaryingLengthCodec<InetAddress[]>() {
+        @Override public int size(InetAddress[] obj) {
+            return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, InetAddress[] obj) {
+        @Override protected void write_do(ByteWriter writer, InetAddress[] obj) {
             for (InetAddress inetAddress : obj) {
-                CODEC_INET_ADDRESS.write(buffer, inetAddress);
+                CODEC_INET_ADDRESS.write(writer, inetAddress);
             }
         }
-        @Override protected InetAddress[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected InetAddress[] read_do(int size, ByteReader reader) throws InvalidDataException {
             InetAddress[] addresses = new InetAddress[size];
             for (int i = 0; i < size; i++) {
-                addresses[i] = CODEC_INET_ADDRESS.read(buffer);
+                addresses[i] = CODEC_INET_ADDRESS.read(reader);
             }
             return addresses;
         }
     };
 
-    public static final DbCodec<String[]> CODEC_ARRAY_STRING_8BIT = new VaryingLengthCodec<String[]>() {
-        @Override public int length(String[] obj) {
-            int resultingLength = 0;
-            for (String s : obj) {
-                resultingLength += Integer.BYTES + CODEC_STRING_8BIT.length(s);
-            }
-            return resultingLength;
-        }
+    public static final DataCodec<String[]> CODEC_ARRAY_STR8 = new VaryingLengthCodec<String[]>() {
         @Override public int size(String[] obj) {
             return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, String[] obj) {
+        @Override protected void write_do(ByteWriter writer, String[] obj) {
             for (String s : obj) {
-                CODEC_STRING_8BIT.write(buffer, s);
+                CODEC_STR8.write(writer, s);
             }
         }
-        @Override protected String[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected String[] read_do(int size, ByteReader reader) throws InvalidDataException {
             String[] strings = new String[size];
             for (int i = 0; i < size; i++) {
-                strings[i] = CODEC_STRING_8BIT.read(buffer);
+                strings[i] = CODEC_STR8.read(reader);
             }
             return strings;
         }
     };
 
-    public static final DbCodec<String[]> CODEC_ARRAY_STRING_16BIT = new VaryingLengthCodec<String[]>() {
-        @Override public int length(String[] obj) {
-            int resultingLength = 0;
-            for (String s : obj) {
-                resultingLength += Integer.BYTES + CODEC_STRING_16BIT.length(s);
-            }
-            return resultingLength;
-        }
+    public static final DataCodec<String[]> CODEC_ARRAY_STR16 = new VaryingLengthCodec<String[]>() {
         @Override public int size(String[] obj) {
             return obj.length;
         }
-        @Override protected void write_do(ByteBuffer buffer, String[] obj) {
+        @Override protected void write_do(ByteWriter writer, String[] obj) {
             for (String s : obj) {
-                CODEC_STRING_16BIT.write(buffer, s);
+                CODEC_STR16.write(writer, s);
             }
         }
-        @Override protected String[] read_do(int size, ByteBuffer buffer) throws InvalidDataException {
+        @Override protected String[] read_do(int size, ByteReader reader) throws InvalidDataException {
             String[] strings = new String[size];
             for (int i = 0; i < size; i++) {
-                strings[i] = CODEC_STRING_16BIT.read(buffer);
+                strings[i] = CODEC_STR16.read(reader);
             }
             return strings;
         }
     };
 
-    public static final DbCodec<List<Boolean>> CODEC_LIST_BOOL = new CodecList<>(CODEC_BOOL);
+    public static final DataCodec<List<Boolean>> CODEC_LIST_BOOL = new CodecList<>(CODEC_BOOL);
 
-    public static final DbCodec<List<Byte>> CODEC_LIST_BYTE = new CodecList<>(CODEC_BYTE);
+    public static final DataCodec<List<Byte>> CODEC_LIST_BYTE = new CodecList<>(CODEC_BYTE);
 
-    public static final DbCodec<List<Short>> CODEC_LIST_SHORT = new CodecList<>(CODEC_SHORT);
+    public static final DataCodec<List<Short>> CODEC_LIST_SHORT = new CodecList<>(CODEC_SHORT);
 
-    public static final DbCodec<List<Integer>> CODEC_LIST_INT = new CodecList<>(CODEC_INT);
+    public static final DataCodec<List<Integer>> CODEC_LIST_INT = new CodecList<>(CODEC_INT);
 
-    public static final DbCodec<List<Long>> CODEC_LIST_LONG = new CodecList<>(CODEC_LONG);
+    public static final DataCodec<List<Long>> CODEC_LIST_LONG = new CodecList<>(CODEC_LONG);
 
-    public static final DbCodec<List<Float>> CODEC_LIST_FLOAT = new CodecList<>(CODEC_FLOAT);
+    public static final DataCodec<List<Float>> CODEC_LIST_FLOAT = new CodecList<>(CODEC_FLOAT);
 
-    public static final DbCodec<List<Double>> CODEC_LIST_DOUBLE = new CodecList<>(CODEC_DOUBLE);
+    public static final DataCodec<List<Double>> CODEC_LIST_DOUBLE = new CodecList<>(CODEC_DOUBLE);
 
-    public static final DbCodec<List<Character>> CODEC_LIST_CHAR = new CodecList<>(CODEC_CHAR);
+    public static final DataCodec<List<Character>> CODEC_LIST_CHAR = new CodecList<>(CODEC_CHAR);
 
-    public static final DbCodec<List<Date>> CODEC_LIST_DATE = new CodecList<>(CODEC_DATE);
+    public static final DataCodec<List<Date>> CODEC_LIST_DATE = new CodecList<>(CODEC_DATE);
 
-    public static final DbCodec<List<UUID>> CODEC_LIST_UUID = new CodecList<>(CODEC_UUID);
+    public static final DataCodec<List<UUID>> CODEC_LIST_UUID = new CodecList<>(CODEC_UUID);
 
-    public static final DbCodec<List<InetAddress>> CODEC_LIST_INET_ADDRESS = new CodecList<>(CODEC_INET_ADDRESS);
+    public static final DataCodec<List<InetAddress>> CODEC_LIST_INET_ADDRESS = new CodecList<>(CODEC_INET_ADDRESS);
 
-    public static final DbCodec<List<String>> CODEC_LIST_STRING_UTF8 = new CodecList<>(CODEC_STRING_8BIT);
+    public static final DataCodec<List<String>> CODEC_LIST_STRING_UTF8 = new CodecList<>(CODEC_STR8);
 
-    public static final DbCodec<List<String>> CODEC_LIST_STRING_UTF16 = new CodecList<>(CODEC_STRING_16BIT);
+    public static final DataCodec<List<String>> CODEC_LIST_STRING_UTF16 = new CodecList<>(CODEC_STR16);
 
 }

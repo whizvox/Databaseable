@@ -8,13 +8,15 @@ public final class FileIOGenerator extends IOGenerator<File> {
         super(seed);
     }
 
-    @Override
-    public OutputStream generateOutputStream() throws IOException {
+    public FileIOGenerator(String filePath) {
+        this(new File(filePath));
+    }
+
+    @Override public OutputStream generateOutputStream() throws IOException {
         return new FileOutputStream(getSeed());
     }
 
-    @Override
-    public InputStream generateInputStream() throws IOException {
+    @Override public InputStream generateInputStream() throws IOException {
         return new FileInputStream(getSeed());
     }
 

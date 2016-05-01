@@ -16,9 +16,10 @@ public class Database<T extends Row> {
     private String[] names;
     private DataCodec[] codecs;
     private IOGenerator ioGenerator = null;
-    private SaveFormat saveFormat;
+    private SaveFormat saveFormat = null;
     private final Class<T> rowClass;
     private Date lastSaved = null;
+    private boolean busy = false;
 
     private int columnCount;
 
@@ -53,51 +54,51 @@ public class Database<T extends Row> {
         }
     }
 
-    public Database<T> setVersion(int version) {
+    public Database<T> version(int version) {
         this.version = version;
         return this;
     }
 
-    public Database<T> setKeyColumn(int index) {
+    public Database<T> keyColumn(int index) {
         checkColumnIndex(index);
         this.keyColumn = index;
         return this;
     }
 
-    public Database<T> setColumnNames(String... names) {
+    public Database<T> names(String... names) {
         assert columnCount == names.length;
         this.names = new String[columnCount];
         System.arraycopy(names, 0, this.names, 0, columnCount);
         return this;
     }
 
-    public Database<T> setCodecs(DataCodec... codecs) {
+    public Database<T> codecs(DataCodec... codecs) {
         assert columnCount == codecs.length;
         this.codecs = new DataCodec[columnCount];
         System.arraycopy(codecs, 0, this.codecs, 0, columnCount);
         return this;
     }
 
-    public Database<T> setIOGenerator(IOGenerator ioGenerator) {
+    public Database<T> ioGenerator(IOGenerator ioGenerator) {
         this.ioGenerator = ioGenerator;
         return this;
     }
 
-    public Database<T> setFile(File file) {
-        return setIOGenerator(new FileIOGenerator(file));
+    public Database<T> file(File file) {
+        return ioGenerator(new FileIOGenerator(file));
     }
 
-    public Database<T> setSaveFormat(SaveFormat saveFormat) {
+    public Database<T> saveFormat(SaveFormat saveFormat) {
         this.saveFormat = saveFormat;
         return this;
     }
 
-    public Database<T> setSaveFormatBufferSize(int bufferSize) {
-        return setSaveFormat(new SaveFormat(bufferSize));
+    public Database<T> bufferSize(int bufferSize) {
+        return saveFormat(new SaveFormat(bufferSize));
     }
 
-    public Database<T> setDefaultSaveFormat() {
-        return setSaveFormatBufferSize(1024);
+    public Database<T> defaultSaveFormat() {
+        return bufferSize(1024);
     }
 
     public final int getColumnCount() {
@@ -126,7 +127,15 @@ public class Database<T extends Row> {
     }
 
     public void save(OutputStream out) throws IOException {
+        if (saveFormat == null) {
+            saveFormat = new SaveFormat();
+        }
+        if (busy) {
+            throw new IllegalStateException("Database is busy either reading or writing");
+        }
+        busy = true;
         saveFormat.save(this, out);
+        busy = false;
     }
 
     public void save(File file) throws IOException {
@@ -138,7 +147,15 @@ public class Database<T extends Row> {
     }
 
     public void load(InputStream in) throws IOException {
-        saveFormat.load(this, in);
+        if (saveFormat == null) {
+            saveFormat = new SaveFormat();
+        }
+        if (busy) {
+            throw new IllegalStateException("Database is busy either reading or writing");
+        }
+        busy = true;
+        saveFormat.load(this, getRowClass(), in);
+        busy = false;
     }
 
     public void load(File file) throws IOException {

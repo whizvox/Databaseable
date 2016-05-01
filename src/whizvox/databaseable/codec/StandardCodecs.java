@@ -19,7 +19,7 @@ public class StandardCodecs {
             writer.write((byte) (obj ? 1 : 0));
         }
         @Override public Boolean read(ByteReader reader) throws InvalidDataException {
-            byte b = reader.read();
+            byte b = reader.readByte();
             if (b == 0) {
                 return false;
             } else if (b == 1) {
@@ -34,7 +34,7 @@ public class StandardCodecs {
             writer.write(obj);
         }
         @Override public Byte read(ByteReader reader) throws InvalidDataException {
-            return reader.read();
+            return reader.readByte();
         }
     };
 
@@ -107,7 +107,9 @@ public class StandardCodecs {
             writer.write(obj.getLeastSignificantBits());
         }
         @Override public UUID read(ByteReader reader) throws InvalidDataException {
-            return new UUID(reader.readLong(), reader.readLong());
+            long high = reader.readLong();
+            long low = reader.readLong();
+            return new UUID(high, low);
         }
     };
 

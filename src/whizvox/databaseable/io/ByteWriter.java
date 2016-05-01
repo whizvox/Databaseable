@@ -28,33 +28,33 @@ public class ByteWriter extends ByteContainer {
     }
 
     public ByteWriter write(short s) {
-        writeByte((byte) (s << 8));
+        writeByte((byte) (s >> 8));
         writeByte((byte) s);
         return this;
     }
 
     public ByteWriter write(char c) {
-        writeByte((byte) (c << 8));
+        writeByte((byte) (c >> 8));
         writeByte((byte) c);
         return this;
     }
 
     public ByteWriter write(int i) {
-        writeByte((byte) (i << 24));
-        writeByte((byte) (i << 16));
-        writeByte((byte) (i << 8));
+        writeByte((byte) (i >> 24));
+        writeByte((byte) (i >> 16));
+        writeByte((byte) (i >> 8));
         writeByte((byte) i);
         return this;
     }
 
     public ByteWriter write(long l) {
-        writeByte((byte) (l << 56));
-        writeByte((byte) (l << 48));
-        writeByte((byte) (l << 40));
-        writeByte((byte) (l << 32));
-        writeByte((byte) (l << 24));
-        writeByte((byte) (l << 16));
-        writeByte((byte) (l << 8));
+        writeByte((byte) (l >> 56));
+        writeByte((byte) (l >> 48));
+        writeByte((byte) (l >> 40));
+        writeByte((byte) (l >> 32));
+        writeByte((byte) (l >> 24));
+        writeByte((byte) (l >> 16));
+        writeByte((byte) (l >> 8));
         writeByte((byte) l);
         return this;
     }

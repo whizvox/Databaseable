@@ -15,8 +15,12 @@ public class ByteReader extends ByteContainer {
         this(new byte[capacity]);
     }
 
-    public final byte read() {
+    public final byte readByte() {
         return super.readByte();
+    }
+
+    public final int read() {
+        return readByte() & 0xff;
     }
 
     @Override public boolean readFromStream(InputStream in) throws IOException {
@@ -47,7 +51,7 @@ public class ByteReader extends ByteContainer {
     public char readChar() {
         char c = 0;
         c |= read() << 8;
-        c |= read();
+        c |= read() & 0xff;
         return c;
     }
 
@@ -64,12 +68,12 @@ public class ByteReader extends ByteContainer {
         long l = 0;
         l |= (long) read() << 56;
         l |= (long) read() << 48;
-        l |= (long) read() << 56;
-        l |= (long) read() << 48;
-        l |= read() << 24;
-        l |= read() << 16;
-        l |= read() << 8;
-        l |= read();
+        l |= (long) read() << 40;
+        l |= (long) read() << 32;
+        l |= (long) read() << 24;
+        l |= (long) read() << 16;
+        l |= (long) read() << 8;
+        l |= (long) read();
         return l;
     }
 
@@ -84,7 +88,7 @@ public class ByteReader extends ByteContainer {
     public CharSequence readStr8() {
         int len = readInt();
         if (len < 0 || len > Databaseable.MAX_STRING_SIZE) {
-            throw new RuntimeException("String len is OOB: " + len);
+            throw new RuntimeException("String len is out of bounds: " + len);
         }
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
@@ -96,7 +100,7 @@ public class ByteReader extends ByteContainer {
     public CharSequence readStr16() {
         int len = readInt();
         if (len < 0 || len > Databaseable.MAX_STRING_SIZE) {
-            throw new RuntimeException("String len is OOB: " + len);
+            throw new RuntimeException("String len is out of bounds: " + len);
         }
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {

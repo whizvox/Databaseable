@@ -401,8 +401,8 @@ public class StandardCodecs {
 
     public static final DataCodec<List<InetAddress>> CODEC_LIST_INET_ADDRESS = new CodecList<>(CODEC_INET_ADDRESS);
 
-    public static final DataCodec<List<String>> CODEC_LIST_STRING_UTF8 = new CodecList<>(CODEC_STR8);
+    public static final DataCodec<List<String>> CODEC_LIST_STR8 = new CodecList<>(CODEC_STR8);
 
-    public static final DataCodec<List<String>> CODEC_LIST_STRING_UTF16 = new CodecList<>(CODEC_STR16);
+    public static final DataCodec<List<String>> CODEC_LIST_STR16 = new CodecList<>(CODEC_STR16);
 
 }

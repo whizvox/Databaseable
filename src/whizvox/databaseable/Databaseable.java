@@ -8,4 +8,13 @@ public class Databaseable {
 
     public static final String VERSION = "${version}";
 
+    public static final boolean parseBool(String s) {
+        if (s.equalsIgnoreCase("true") || s.equalsIgnoreCase("t") || s.equals("1")) {
+            return true;
+        } else if (s.equalsIgnoreCase("false") || s.equalsIgnoreCase("f") || s.equals("0")) {
+            return false;
+        }
+        throw new NumberFormatException("Invalid boolean: " + s);
+    }
+
 }

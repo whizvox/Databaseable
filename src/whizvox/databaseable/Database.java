@@ -105,6 +105,19 @@ public class Database<T extends Row> {
         return columnCount;
     }
 
+    public final int getColumnIndex(String name) {
+        for (int i = 0; i < names.length; i++) {
+            if (names[i].equalsIgnoreCase(name)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public final boolean hasColumn(String name) {
+        return getColumnIndex(name) != -1;
+    }
+
     public Date getLastSaved() {
         return lastSaved;
     }
@@ -164,6 +177,17 @@ public class Database<T extends Row> {
 
     public void load() throws IOException {
         load(ioGenerator.generateInputStream());
+    }
+
+    public DataCodec getCodec(int columnIndex) {
+        checkColumnIndex(columnIndex);
+        return codecs[columnIndex];
+    }
+
+    public DataCodec getCodec(String columnName) {
+        int columnIndex = getColumnIndex(columnName);
+        checkColumnIndex(columnIndex);
+        return codecs[columnIndex];
     }
 
     protected void setLastSaved(Date lastSaved) {

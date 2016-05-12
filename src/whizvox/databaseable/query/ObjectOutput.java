@@ -5,16 +5,20 @@ import whizvox.databaseable.Row;
 
 import java.util.*;
 
-public class ObjectOutput<T extends Row> implements Iterable<T> {
+public class ObjectOutput<T extends Object> implements Iterable<T> {
 
     private List<T> list = new ArrayList<>();
     private ObjectOutputIterator iter = new ObjectOutputIterator();
     private int limit = -1;
 
-    public void putAll(Database<T> db) {
+    public void add(T obj) {
+        list.add(obj);
+    }
+
+    public void putAll(Database<? extends Row> db) {
         list.clear();
         for (int i = 0; i < db.getRowCount(); i++) {
-            list.add(db.get(i));
+            list.add((T) db.get(i));
         }
     }
 

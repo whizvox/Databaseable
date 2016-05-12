@@ -1,5 +1,7 @@
 package whizvox.databaseable;
 
+import java.util.Arrays;
+
 public class Row {
 
     private Object[] objects;
@@ -32,6 +34,11 @@ public class Row {
         Object old = get(index);
         objects[index] = newObject;
         return old;
+    }
+
+    @Override
+    public String toString() {
+        return "Row(" + Arrays.toString(objects) + ')';
     }
 
 }

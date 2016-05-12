@@ -4,21 +4,19 @@ import whizvox.databaseable.Database;
 import whizvox.databaseable.Databaseable;
 import whizvox.databaseable.Row;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public interface StatementController {
+public interface ArgumentController {
 
-    Object[] parseArgs(String[] args) throws IllegalArgumentException;
+    Object[] parseParams(String[] args) throws IllegalArgumentException;
 
     <T extends Row> void control(ObjectOutput<T> out, Database<T> db, Object[] args) throws IllegalArgumentException;
 
-    StatementController LIMIT = new StatementController() {
+    ArgumentController LIMIT = new ArgumentController() {
         public static final int LIMIT_MAX = 65536;
-        @Override public Object[] parseArgs(String[] args) throws IllegalArgumentException {
+        @Override public Object[] parseParams(String[] args) throws IllegalArgumentException {
             if (args.length > 0) {
                 try {
                     int n = Integer.parseInt(args[0]);
@@ -38,8 +36,8 @@ public interface StatementController {
         }
     };
 
-    StatementController ORDER = new StatementController() {
-        @Override public Object[] parseArgs(String[] args) throws IllegalArgumentException {
+    ArgumentController ORDER = new ArgumentController() {
+        @Override public Object[] parseParams(String[] args) throws IllegalArgumentException {
             if (args.length > 0) {
                 Object[] out = new Object[2];
                 out[0] = args[0].toLowerCase();
@@ -62,35 +60,38 @@ public interface StatementController {
                 throw new IllegalArgumentException("Database does not have column: " + name);
             }
             int columnIndex = db.getColumnIndex(name);
-            Class<?> superClass = db.getCodec(columnIndex).getClass().getGenericSuperclass().getClass();
-            boolean descendingOrder = (boolean) args[1];
-            if (superClass.isAssignableFrom(Number.class)) {
+            boolean ascendingOrder = (boolean) args[1];
+            try {
                 out.sort((o1, o2) -> {
                     Number n1 = (Number) o1.get(columnIndex);
                     Number n2 = (Number) o2.get(columnIndex);
-                    return (int) (n1.doubleValue() - n2.doubleValue()) * (descendingOrder ? 1 : -1);
+                    return (int) (n1.doubleValue() - n2.doubleValue()) * (ascendingOrder ? 1 : -1);
                 });
-            } else if (superClass.isAssignableFrom(String.class)) {
+                return;
+            } catch (Exception e) {}
+            try {
                 out.sort((o1, o2) -> {
                     String s1 = (String) o1.get(columnIndex);
                     String s2 = (String) o2.get(columnIndex);
-                    return s1.compareToIgnoreCase(s2) * (descendingOrder ? 1 : -1);
+                    return s1.compareToIgnoreCase(s2) * (ascendingOrder ? 1 : -1);
                 });
-            } else if (superClass.isAssignableFrom(Comparable.class)) {
+                return;
+            } catch (Exception e) {}
+            try {
                 out.sort((o1, o2) -> {
                     Comparable c1 = (Comparable) o1.get(columnIndex);
                     Comparable c2 = (Comparable) o2.get(columnIndex);
-                    return c1.compareTo(c2) * (descendingOrder ? 1 : -1);
+                    return c1.compareTo(c2) * (ascendingOrder ? 1 : -1);
                 });
-            } else {
-                throw new IllegalArgumentException("Column type cannot be compared. Can only be a number or a string or an instance of " + Comparable.class.getName() + ": " + superClass.getName());
-            }
+                return;
+            } catch (Exception e) {}
+            throw new IllegalArgumentException("Column type cannot be compared. Can only be a number or a string or an instance of " + Comparable.class.getName());
         }
     };
 
-    StatementController IF = new StatementController() {
+    ArgumentController IF = new ArgumentController() {
         @Override
-        public Object[] parseArgs(String[] args) throws IllegalArgumentException {
+        public Object[] parseParams(String[] args) throws IllegalArgumentException {
             if (args.length > 0) {
                 Scanner scanner = new Scanner(args[0]);
                 try {

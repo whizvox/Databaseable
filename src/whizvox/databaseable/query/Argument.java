@@ -3,47 +3,55 @@ package whizvox.databaseable.query;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Statement {
+public class Argument {
 
     public final String name;
-    private String[] args;
+    private String[] params;
 
-    public Statement(String name, String... args) {
+    public Argument(String name, String... params) {
         this.name = name;
-        this.args = args;
+        this.params = params;
     }
 
-    public Statement(String name, List<String> list) {
-        this(name, list.toArray(new String[list.size()]));
+    public Argument(String name, List<String> paramsList) {
+        this(name, paramsList.toArray(new String[paramsList.size()]));
     }
 
-    public Object get(int index) {
-        return args[index];
+    public String get(int index) {
+        return params[index];
     }
 
-    public int getNumberArgs() {
-        return args.length;
+    public String[] getAll() {
+        return params;
+    }
+
+    public int getNumberParams() {
+        return params.length;
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append(name).append(": ");
-        for (String arg : args) {
+        for (String arg : params) {
             sb.append('(').append(arg).append(')').append(' ');
         }
         return sb.toString();
     }
 
     // warning: ugly parsing ahead :)
-    public static List<Statement> getStatements(String cmd) {
-        List<Statement> list = new ArrayList<>();
+    public static List<Argument> getArguments(String cmd) {
+        List<Argument> list = new ArrayList<>();
         boolean inString = false, backslash = false, wasString = false;
         int openParen = 0, lastSpace = 0, lastComma = 0;
 
-        String currentStatementName = null;
-        List<String> currentStatementArgs = new ArrayList<>();
+        String currentArgName = null;
+        List<String> currentArgParams = new ArrayList<>();
 
+        int indexOf = cmd.indexOf(' ');
+        if (indexOf == -1) {
+            return null;
+        }
         for (int i = cmd.indexOf(' '); i < cmd.length(); i++) {
             char c = cmd.charAt(i);
             if (backslash) {
@@ -64,7 +72,7 @@ public class Statement {
                         openParen++;
                         if (openParen == 1) {
                             lastComma = i;
-                            currentStatementName = cmd.substring(lastSpace + 1, i);
+                            currentArgName = cmd.substring(lastSpace + 1, i);
                             lastSpace = i;
                         }
                         break;
@@ -75,13 +83,13 @@ public class Statement {
                             if (wasString) {
                                 arg = arg.substring(1, arg.length() - 1).replace("\\\"", "\"");
                             }
-                            if (currentStatementArgs.size() > 0 || (wasString && currentStatementArgs.size() == 0) || !arg.equals("")) {
+                            if (currentArgParams.size() > 0 || (wasString && currentArgParams.size() == 0) || !arg.equals("")) {
                                 wasString = false;
-                                currentStatementArgs.add(arg);
+                                currentArgParams.add(arg);
                             }
-                            list.add(new Statement(currentStatementName, currentStatementArgs));
-                            currentStatementArgs.clear();
-                            currentStatementName = null;
+                            list.add(new Argument(currentArgName, currentArgParams));
+                            currentArgParams.clear();
+                            currentArgName = null;
                         }
                         break;
                     case ' ':
@@ -93,7 +101,7 @@ public class Statement {
                             arg = arg.substring(1, arg.length() - 1).replace("\\\"", "\"");
                             wasString = false;
                         }
-                        currentStatementArgs.add(arg);
+                        currentArgParams.add(arg);
                         lastComma = i;
                         break;
                     default:

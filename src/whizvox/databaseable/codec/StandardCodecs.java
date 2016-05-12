@@ -399,7 +399,7 @@ public class StandardCodecs {
 
     public static final DataCodec<List<UUID>> CODEC_LIST_UUID = new CodecList<>(CODEC_UUID);
 
-    public static final DataCodec<List<InetAddress>> CODEC_LIST_INET_ADDRESS = new CodecList<>(CODEC_INET_ADDRESS);
+    public static final DataCodec<List<InetAddress>> CODEC_LIST_INETADDRESS = new CodecList<>(CODEC_INET_ADDRESS);
 
     public static final DataCodec<List<String>> CODEC_LIST_STR8 = new CodecList<>(CODEC_STR8);
 

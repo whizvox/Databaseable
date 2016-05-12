@@ -6,6 +6,7 @@ import whizvox.databaseable.io.IOGenerator;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -190,6 +191,11 @@ public class Database<T extends Row> {
         return codecs[columnIndex];
     }
 
+    public String getName(int columnIndex) {
+        checkColumnIndex(columnIndex);
+        return names[columnIndex];
+    }
+
     protected void setLastSaved(Date lastSaved) {
         this.lastSaved = lastSaved;
     }
@@ -204,6 +210,11 @@ public class Database<T extends Row> {
 
     protected void setColumnCount(int columnCount) {
         this.columnCount = columnCount;
+    }
+
+    @Override
+    public String toString() {
+        return "Database(names=" + Arrays.toString(names) + ",codecs=" + Arrays.toString(codecs) + ",rows=" + getRowCount() + ")";
     }
 
 }
